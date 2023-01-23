@@ -220,6 +220,7 @@ class ApiClient(
         repoOwner: String?,
         repoName: String?,
         branch: String?,
+        commitSha: String?,
         pullRequestId: String?,
         env: Map<String, String>? = null,
         androidApiLevel: Int?,
@@ -239,6 +240,7 @@ class ApiClient(
         repoOwner?.let { requestPart["repoOwner"] = it }
         repoName?.let { requestPart["repoName"] = it }
         branch?.let { requestPart["branch"] = it }
+        commitSha?.let { requestPart["commitSha"] = it }
         pullRequestId?.let { requestPart["pullRequestId"] = it }
         env?.let { requestPart["env"] = it }
         requestPart["agent"] = getAgent()
@@ -281,6 +283,7 @@ class ApiClient(
                         repoOwner,
                         repoName,
                         branch,
+                        commitSha,
                         pullRequestId,
                         env,
                         androidApiLevel,
