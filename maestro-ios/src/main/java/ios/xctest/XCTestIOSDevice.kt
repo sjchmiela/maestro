@@ -33,6 +33,10 @@ class XCTestIOSDevice(
         ensureXCUITestChannel()
     }
 
+    override fun isOpen(): Boolean {
+        return installer.isXcChannelReachable()
+    }
+
     private fun ensureXCUITestChannel() {
         logger.info("[Start] Uninstalling xctest ui runner app on $deviceId")
         installer.killAndUninstall()

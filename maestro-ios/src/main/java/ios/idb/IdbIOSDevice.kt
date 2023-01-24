@@ -77,8 +77,15 @@ class IdbIOSDevice(
     private val blockingStub = CompanionServiceGrpc.newBlockingStub(channel)
     private val asyncStub = CompanionServiceGrpc.newStub(channel)
 
+    private var idbChannelOpened = false
+
     override fun open() {
         ensureGrpcChannel()
+        idbChannelOpened = true
+    }
+
+    override fun isOpen(): Boolean {
+        return idbChannelOpened
     }
 
     @SuppressWarnings("Used in cloud")
@@ -471,6 +478,7 @@ class IdbIOSDevice(
         if (!channel.awaitTermination(10, TimeUnit.SECONDS)) {
             throw TimeoutException("Couldn't close Maestro iOS driver due to gRPC timeout")
         }
+        idbChannelOpened = false
     }
 
     companion object {

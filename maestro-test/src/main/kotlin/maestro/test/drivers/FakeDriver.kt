@@ -62,6 +62,10 @@ class FakeDriver : Driver {
         state = State.OPEN
     }
 
+    override fun isOpen(): Boolean {
+        return state == State.OPEN
+    }
+
     override fun close() {
         if (state == State.CLOSED) {
             throw IllegalStateException("Already closed")

@@ -58,6 +58,15 @@ class LocalXCTestInstaller(
         }
     }
 
+    override fun isXcChannelReachable() : Boolean {
+        return try {
+            XCRunnerSimctl.isAppAlive(UI_TEST_RUNNER_APP_BUNDLE_ID) &&
+                driverClient.subTree(UI_TEST_RUNNER_APP_BUNDLE_ID).use { it.isSuccessful }
+        } catch (ignore: ConnectException) {
+            false
+        }
+    }
+
     private fun runXCTest() {
         val processOutput = ProcessBuilder(
             "bash",

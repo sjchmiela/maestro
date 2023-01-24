@@ -24,6 +24,10 @@ class LocalIOSDevice(
         xcTestDevice.open()
     }
 
+    override fun isOpen(): Boolean {
+        return idbIOSDevice.isOpen() && xcTestDevice.isOpen() && xcRunIOSDevice.isOpen()
+    }
+
     override fun deviceInfo(): Result<DeviceInfo, Throwable> {
         return idbIOSDevice.deviceInfo()
     }

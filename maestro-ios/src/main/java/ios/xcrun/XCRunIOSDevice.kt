@@ -27,6 +27,10 @@ class XCRunIOSDevice(
         // Do nothing
     }
 
+    override fun isOpen(): Boolean {
+        return deviceId != null
+    }
+
     override fun deviceInfo(): Result<DeviceInfo, Throwable> {
         error("Not supported")
     }

@@ -6,4 +6,5 @@ interface XCTestInstaller: AutoCloseable {
 
     fun killAndUninstall()
 
+    fun isXcChannelReachable(): Boolean
 }

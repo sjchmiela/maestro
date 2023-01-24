@@ -525,7 +525,7 @@ class Maestro(private val driver: Driver) : AutoCloseable {
             driver: Driver,
             openDriver: Boolean = true,
         ): Maestro {
-            if (openDriver) {
+            if (openDriver || !driver.isOpen()) {
                 driver.open()
             }
             return Maestro(driver)
@@ -537,7 +537,7 @@ class Maestro(private val driver: Driver) : AutoCloseable {
             openDriver: Boolean = true,
         ): Maestro {
             val driver = AndroidDriver(dadb, hostPort = hostPort)
-            if (openDriver) {
+            if (openDriver || !driver.isOpen()) {
                 driver.open()
             }
             return Maestro(driver)

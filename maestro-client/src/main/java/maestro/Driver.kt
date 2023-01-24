@@ -28,6 +28,8 @@ interface Driver {
 
     fun open()
 
+    fun isOpen(): Boolean
+
     fun close()
 
     fun deviceInfo(): DeviceInfo

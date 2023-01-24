@@ -98,6 +98,11 @@ class AndroidDriver(
         allocateForwarder()
     }
 
+    override fun isOpen(): Boolean {
+        val response = dadb.shell("ps | grep dev.mobile.maestro")
+        return response.exitCode == 0 && response.allOutput.isNotBlank()
+    }
+
     private fun allocateForwarder() {
         PORT_TO_FORWARDER[hostPort]?.close()
         PORT_TO_ALLOCATION_POINT[hostPort]?.let {

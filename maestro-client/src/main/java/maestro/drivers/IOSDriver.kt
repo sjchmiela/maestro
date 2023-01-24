@@ -71,6 +71,10 @@ class IOSDriver(
         iosDevice.open()
     }
 
+    override fun isOpen(): Boolean {
+        return iosDevice.isOpen()
+    }
+
     override fun close() {
         if (proxySet) {
             resetProxy()

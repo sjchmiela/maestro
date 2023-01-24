@@ -33,6 +33,8 @@ interface IOSDevice : AutoCloseable {
 
     fun open()
 
+    fun isOpen(): Boolean
+
     fun deviceInfo(): Result<DeviceInfo, Throwable>
 
     fun contentDescriptor(): Result<XCUIElement, Throwable>
