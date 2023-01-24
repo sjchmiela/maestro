@@ -80,3 +80,54 @@
         return segs.length ? '/' + segs.join('/') : null;
     }
 }( window.maestro = window.maestro || {} ));
+
+const id = 'cursor-click-animation-canvas'
+const color = '56, 96, 242'
+
+const getOrCreateCanvas = () => {
+	let canvas = document.getElementById(id)
+	if (!!canvas) return canvas
+
+	canvas = document.createElement('canvas')
+  canvas.id = id
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+  canvas.style.zIndex = 10000
+  canvas.style.position = 'fixed'
+  canvas.style.top = 0
+  canvas.style.left = 0
+
+
+  const body = document.getElementsByTagName("body")[0]
+  body.appendChild(canvas);
+
+  return document.getElementById(id)
+}
+
+document.onmouseup = ({ clientX, clientY }) => {
+    const canvas = getOrCreateCanvas()
+    const r = 25
+
+    const ctx = canvas.getContext('2d')
+    ctx.beginPath()
+    ctx.fillStyle = `rgba(${color}, 1.0)`
+    ctx.arc(clientX, clientY, r, 0, Math.PI*2)
+    ctx.fill()
+    ctx.closePath()
+
+    let count = 0;
+    let interval = setInterval(() => {
+        ctx.clearRect(clientX-50, clientY-50, 100, 100);
+        if (count < 25) {
+          count++
+          ctx.beginPath()
+          ctx.fillStyle = `rgba(${color}, ${1 - 0.04 * count})`
+          ctx.arc(clientX, clientY, r + 0.3 * count, 0, Math.PI*2)
+          ctx.fill()
+          ctx.closePath()
+        } else {
+          clearInterval(interval)
+          canvas.remove()
+        }
+    }, 5)
+}

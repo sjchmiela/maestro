@@ -1,0 +1,55 @@
+appId: "https://apple.com"
+---
+- launchApp
+- tapOn:
+    id: "ac-ls-close"
+- tapOn: "Store"
+- assertVisible: "The best way to buy the products you love."
+- tapOn:
+    text: "iPhone"
+    index: 1
+- assertVisible: "Shop iPhone"
+- tapOn: "iPhone 14 Pro.*"
+- tapOn: "Buy"
+- tapOn: "iPhone 14 Pro Max"
+- tapOn:
+    containsChild:
+      text: "spaceblack"
+- assertVisible: "Color - Space Black"
+- tapOn: "128gb"
+- tapOn: "No trade-in"
+- tapOn: "Pay the total amount today."
+- tapOn: "Connect to any carrier later"
+- tapOn:
+    id: "applecareplus_59_noapplecare"
+- tapOn: "Add to Bag"
+- assertVisible: "iPhone 14 Pro Max 128GB Space Black"
+- tapOn: "Review Bag"
+- assertVisible: "iPhone 14 Pro Max 128GB Space Black"
+- tapOn: "Check Out"
+- tapOn: "Continue as Guest"
+- tapOn:
+    id: "checkout.fulfillment.deliveryTab.delivery.deliveryLocation.address.postalCode"
+- inputText: "94103"
+- tapOn: "Apply"
+- scroll
+- scroll
+- tapOn: "Continue to Shipping Address"
+- assertVisible: "Where should we send your order.*"
+- tapOn: "First Name"
+- inputText: "Ada"
+- tapOn: "Last Name"
+- inputText: "Lovelace"
+- tapOn: "Street Address"
+- inputText: "Main Street"
+- scroll
+- tapOn: "Email Address"
+- inputText: "ada@lovelace.com"
+- tapOn: "Phone Number"
+- inputText: "5555551234"
+- tapOn: "Continue to Payment"
+- tapOn: "Use existing address"
+- assertVisible: "How do you want to pay.*"
+- assertVisible: "Credit or Debit Card"
+- tapOn: "Credit or Debit Card"
+- assertVisible: "Enter your card information:"
