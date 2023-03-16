@@ -2496,6 +2496,30 @@ class IntegrationTest {
         )
     }
 
+    @Test
+    fun `Case 091 - Launch app with language set`() {
+        // Given
+        val commands = readCommands("091_launch_app_with_language")
+
+        val driver = driver {
+        }
+        driver.addInstalledApp("com.example.app")
+
+        // When
+        Maestro(driver).use {
+            orchestra(it).runFlow(commands)
+        }
+
+        // Then
+        // No test failure
+        driver.assertEvents(
+            listOf(
+                Event.StopApp("com.example.app"),
+                Event.LaunchApp("com.example.app", "de")
+            )
+        )
+    }
+
     private fun orchestra(maestro: Maestro) = Orchestra(
         maestro,
         lookupTimeoutMs = 0L,
