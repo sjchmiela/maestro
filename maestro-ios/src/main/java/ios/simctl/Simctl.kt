@@ -198,18 +198,14 @@ object Simctl {
             bundleId,
         )
 
-        println("lang $language")
         language?.let {
             if (supportedLanguages.contains(it)) {
-                println("test1")
                 command += listOf(
                     "-AppleLanguages",
                     "($language)"
                 )
             }
         }
-
-        println("command $command")
 
         runCommand(
             command
