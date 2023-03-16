@@ -327,6 +327,7 @@ data class YamlFluentCommand(
                 clearKeychain = command.clearKeychain,
                 stopApp = command.stopApp,
                 permissions = command.permissions,
+                language = command.language,
             )
         )
     }

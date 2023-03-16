@@ -93,8 +93,8 @@ class IOSDriver(
         )
     }
 
-    override fun launchApp(appId: String) {
-        iosDevice.launch(appId)
+    override fun launchApp(appId: String, language: String?) {
+        iosDevice.launch(appId, language)
             .onSuccess { this.appId = appId }
             .getOrThrow {
                 MaestroException.UnableToLaunchApp("Unable to launch app $appId ${it.message}")

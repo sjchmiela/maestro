@@ -10,6 +10,14 @@ object Simctl {
 
     data class SimctlError(override val message: String): Throwable(message)
     private val homedir = System.getProperty("user.home")
+    private val supportedLanguages = listOf(
+        "ar", "ca", "zh-Hans", "zh-Hant", "zh-HK", "hr", "cs", "da",
+        "nl", "en", "en-GB", "en-AU", "en-CA", "en-IN", "en-IE",
+        "en-NZ", "en-SG", "en-ZA", "fi", "fr", "fr-CA", "de", "el",
+        "he", "hi", "hu", "id", "it", "ja", "ko", "ms", "nb", "pl",
+        "pt", "pt-BR", "ro", "ru", "sk", "es", "es-419", "es-MX",
+        "sv", "th", "tr", "uk", "vi"
+    )
 
     fun list(): SimctlList {
         val command = listOf("xcrun", "simctl", "list", "-j")
@@ -181,15 +189,30 @@ object Simctl {
     }
 
 
-    fun launch(deviceId: String, bundleId: String) {
+    fun launch(deviceId: String, bundleId: String, language: String?) {
+        var command = mutableListOf(
+            "xcrun",
+            "simctl",
+            "launch",
+            deviceId,
+            bundleId,
+        )
+
+        println("lang $language")
+        language?.let {
+            if (supportedLanguages.contains(it)) {
+                println("test1")
+                command += listOf(
+                    "-AppleLanguages",
+                    "($language)"
+                )
+            }
+        }
+
+        println("command $command")
+
         runCommand(
-            listOf(
-                "xcrun",
-                "simctl",
-                "launch",
-                deviceId,
-                bundleId,
-            )
+            command
         )
     }
 

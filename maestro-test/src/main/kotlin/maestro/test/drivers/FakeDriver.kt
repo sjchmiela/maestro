@@ -88,14 +88,14 @@ class FakeDriver : Driver {
         )
     }
 
-    override fun launchApp(appId: String) {
+    override fun launchApp(appId: String, language: String?) {
         ensureOpen()
 
         if (appId !in installedApps) {
             throw MaestroException.UnableToLaunchApp("App $appId is not installed")
         }
 
-        events.add(Event.LaunchApp(appId))
+        events.add(Event.LaunchApp(appId, language))
     }
 
     override fun stopApp(appId: String) {
@@ -398,7 +398,8 @@ class FakeDriver : Driver {
         ) : Event(), UserInteraction
 
         data class LaunchApp(
-            val appId: String
+            val appId: String,
+            val language: String?,
         ) : Event(), UserInteraction
 
         data class StopApp(

@@ -560,7 +560,11 @@ class Orchestra(
         }
 
         try {
-            maestro.launchApp(command.appId, stopIfRunning = command.stopApp ?: true)
+            maestro.launchApp(
+                command.appId,
+                stopIfRunning = command.stopApp ?: true,
+                language = command.language
+            )
         } catch (e: Exception) {
             throw MaestroException.UnableToLaunchApp("Unable to launch app ${command.appId}: ${e.message}")
         }
@@ -895,7 +899,6 @@ class Orchestra(
     }
 
     companion object {
-
         val REGEX_OPTIONS = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)
 
         private const val MAX_ERASE_CHARACTERS = 50

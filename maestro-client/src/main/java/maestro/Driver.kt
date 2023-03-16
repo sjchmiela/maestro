@@ -32,7 +32,7 @@ interface Driver {
 
     fun deviceInfo(): DeviceInfo
 
-    fun launchApp(appId: String)
+    fun launchApp(appId: String, language: String?)
 
     fun stopApp(appId: String)
 
