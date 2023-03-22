@@ -22,6 +22,7 @@ package maestro.drivers
 import dadb.AdbShellResponse
 import dadb.AdbShellStream
 import dadb.Dadb
+import idb.launchRequest
 import io.grpc.ManagedChannelBuilder
 import maestro.Capability
 import maestro.DeviceInfo
@@ -48,6 +49,7 @@ import maestro_android.MaestroDriverGrpc
 import maestro_android.deviceInfoRequest
 import maestro_android.eraseAllTextRequest
 import maestro_android.inputTextRequest
+import maestro_android.launchAppRequest
 import maestro_android.screenshotRequest
 import maestro_android.setLocationRequest
 import maestro_android.tapRequest
@@ -173,19 +175,20 @@ class AndroidDriver(
             throw IllegalArgumentException("Package $appId is not installed")
         }
 
-        try {
-            val apkFile = AndroidAppFiles.getApkFile(dadb, appId)
-            val manifest = apkFile.asManifest()
-            runCatching {
-                val launcherActivity = manifest.resolveLauncherActivity(appId)
-                val shellResponse = dadb.shell("am start-activity -n $appId/${launcherActivity}")
-                if (shellResponse.errorOutput.isNotEmpty()) shell("monkey --pct-syskeys 0 -p $appId 1")
-            }.onFailure { shell("monkey --pct-syskeys 0 -p $appId 1") }
-        } catch (ioException: IOException) {
-            shell("monkey --pct-syskeys 0 -p $appId 1")
-        } catch (saxException: SAXException) {
-            shell("monkey --pct-syskeys 0 -p $appId 1")
-        }
+        blockingStub.launchApp(launchAppRequest {  })
+//        try {
+//            val apkFile = AndroidAppFiles.getApkFile(dadb, appId)
+//            val manifest = apkFile.asManifest()
+//            runCatching {
+//                val launcherActivity = manifest.resolveLauncherActivity(appId)
+//                val shellResponse = dadb.shell("am start-activity -n $appId/${launcherActivity}")
+//                if (shellResponse.errorOutput.isNotEmpty()) shell("monkey --pct-syskeys 0 -p $appId 1")
+//            }.onFailure { shell("monkey --pct-syskeys 0 -p $appId 1") }
+//        } catch (ioException: IOException) {
+//            shell("monkey --pct-syskeys 0 -p $appId 1")
+//        } catch (saxException: SAXException) {
+//            shell("monkey --pct-syskeys 0 -p $appId 1")
+//        }
     }
 
     override fun stopApp(appId: String) {

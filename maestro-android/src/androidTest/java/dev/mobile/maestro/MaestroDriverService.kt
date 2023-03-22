@@ -3,6 +3,7 @@ package dev.mobile.maestro
 import android.app.UiAutomation
 import android.content.Context
 import android.content.Context.LOCATION_SERVICE
+import android.content.Intent
 import android.graphics.Bitmap
 import android.location.Criteria
 import android.location.Location
@@ -53,6 +54,7 @@ import maestro_android.MaestroDriverGrpc
 import maestro_android.deviceInfo
 import maestro_android.eraseAllTextResponse
 import maestro_android.inputTextResponse
+import maestro_android.launchAppResponse
 import maestro_android.screenshotResponse
 import maestro_android.setLocationResponse
 import maestro_android.tapResponse
@@ -106,6 +108,23 @@ class Service(
 
     private val geoHandler = Handler(Looper.getMainLooper())
     private var locationCounter = 0;
+
+    override fun launchApp(request: MaestroAndroid.LaunchAppRequest,
+                           responseObserver: StreamObserver<MaestroAndroid.LaunchAppResponse>) {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+
+        Log.d("Maestro", "context $context")
+
+        val intent = context.packageManager.getLaunchIntentForPackage("org.wikipedia")
+
+        Log.d("Maestro", "intent $intent")
+
+        intent!!.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        context.startActivity(intent)
+
+        responseObserver.onNext(launchAppResponse {  })
+        responseObserver.onCompleted()
+    }
 
     override fun deviceInfo(
         request: MaestroAndroid.DeviceInfoRequest,
