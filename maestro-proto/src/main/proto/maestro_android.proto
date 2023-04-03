@@ -17,6 +17,8 @@ service MaestroDriver {
   rpc eraseAllText(EraseAllTextRequest) returns (EraseAllTextResponse) {}
 
   rpc setLocation(SetLocationRequest) returns (SetLocationResponse) {}
+
+  rpc setLocale(SetLocaleRequest) returns (SetLocaleResponse) {}
 }
 
 // Device info
@@ -67,3 +69,6 @@ message SetLocationRequest {
 }
 
 message SetLocationResponse {}
+
+message SetLocaleRequest {}
+message SetLocaleResponse {}

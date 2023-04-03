@@ -49,6 +49,7 @@ import maestro_android.deviceInfoRequest
 import maestro_android.eraseAllTextRequest
 import maestro_android.inputTextRequest
 import maestro_android.screenshotRequest
+import maestro_android.setLocaleRequest
 import maestro_android.setLocationRequest
 import maestro_android.tapRequest
 import maestro_android.viewHierarchyRequest
@@ -181,6 +182,10 @@ class AndroidDriver(
                 val shellResponse = dadb.shell("am start-activity -n $appId/${launcherActivity}")
                 if (shellResponse.errorOutput.isNotEmpty()) shell("monkey --pct-syskeys 0 -p $appId 1")
             }.onFailure { shell("monkey --pct-syskeys 0 -p $appId 1") }
+
+           val res = dadb.shell("am broadcast -a dev.mobile.maestro.CHANGE_LOCALE --es lang zh --es country CN --es script Hans -p dev.mobile.maestro")
+            println("--------$res-------")
+            //blockingStub.setLocale(setLocaleRequest {  }) ?: throw IllegalStateException()
         } catch (ioException: IOException) {
             shell("monkey --pct-syskeys 0 -p $appId 1")
         } catch (saxException: SAXException) {
@@ -727,6 +732,9 @@ class AndroidDriver(
             throw IllegalStateException("dev.mobile.maestro was not installed")
         }
         install(maestroServerApk)
+        val res = dadb.shell("pm grant dev.mobile.maestro android.permission.CHANGE_CONFIGURATION")
+        println("--------$res------")
+        dadb.shell("pm grant dev.mobile.maestro.test android.permission.CHANGE_CONFIGURATION")
     }
 
     private fun uninstallMaestroApks() {

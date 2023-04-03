@@ -45,6 +45,7 @@ import androidx.test.uiautomator.Configurator
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiDeviceExt.clickExt
 import com.google.protobuf.ByteString
+import reciever.LocaleHandler
 import dev.mobile.maestro.sdk.SdkService
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import io.grpc.stub.StreamObserver
@@ -54,14 +55,15 @@ import maestro_android.deviceInfo
 import maestro_android.eraseAllTextResponse
 import maestro_android.inputTextResponse
 import maestro_android.screenshotResponse
+import maestro_android.setLocaleResponse
 import maestro_android.setLocationResponse
 import maestro_android.tapResponse
 import maestro_android.viewHierarchyResponse
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.ByteArrayOutputStream
+import java.util.Locale
 import java.util.UUID
-import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 
 /**
@@ -219,6 +221,16 @@ class Service(
             Log.e("Maestro", "Failed to compress bitmap")
             responseObserver.onError(Throwable("Failed to compress bitmap"))
         }
+    }
+
+    override fun setLocale(
+        request: MaestroAndroid.SetLocaleRequest,
+        responseObserver: StreamObserver<MaestroAndroid.SetLocaleResponse>
+    ) {
+        val locale = Locale.Builder().setLocale(Locale("zh", "CN")).setScript("Hans").build()
+        LocaleHandler().setLocale(locale)
+        responseObserver.onNext(setLocaleResponse {  })
+        responseObserver.onCompleted()
     }
 
     override fun setLocation(
