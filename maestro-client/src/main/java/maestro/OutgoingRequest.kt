@@ -4,7 +4,7 @@ import maestro.mockserver.MockEvent
 import maestro.utils.StringUtils.toRegexSafe
 
 data class OutgoingRequestRules(
-    val path: String,
+    val path: String? = null,
     val headersPresent: List<String> = emptyList(),
     val headersAndValues: Map<String, String> = emptyMap(),
     val httpMethodIs: String? = null,
@@ -16,7 +16,9 @@ object AssertOutgoingRequestService {
     private val REGEX_OPTIONS = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)
 
     fun assert(events: List<MockEvent>, rules: OutgoingRequestRules): List<MockEvent> {
-        val eventsFilteredByUrl = events.filter { e -> e.path == rules.path || e.path.matches(rules.path.toRegexSafe(REGEX_OPTIONS)) }
+        val eventsFilteredByUrl = rules.path?.let { path ->
+            events.filter { e -> e.path == path || e.path.matches(path.toRegexSafe(REGEX_OPTIONS)) }
+        } ?: events
 
         val eventsFilteredByHttpMethod = rules.httpMethodIs?.let { httpMethod ->
             eventsFilteredByUrl.filter { e -> e.method == httpMethod }
