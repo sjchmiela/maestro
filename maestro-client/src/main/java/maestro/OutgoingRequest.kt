@@ -1,7 +1,9 @@
 package maestro
 
 import maestro.mockserver.MockEvent
+import maestro.mockserver.MockInteractor
 import maestro.utils.StringUtils.toRegexSafe
+import java.util.UUID
 
 data class OutgoingRequestRules(
     val path: String? = null,
@@ -37,6 +39,30 @@ object AssertOutgoingRequestService {
         } ?: eventsFilteredByHeadersAndValues
 
         return eventsMatching
+    }
+
+    /*
+    There might be a delay between the mock event being stored in our Maestro Cloud and the client trying to retrieve it.
+    That's why we have retries
+     */
+    fun getMockEvents(sessionId: UUID): List<MockEvent> {
+        var attempts = 1
+        val maxRetries = 3
+        var events: List<MockEvent> = emptyList()
+
+        while (events.isEmpty() || attempts <= maxRetries) {
+            println("attempt $attempts of $maxRetries")
+            events = MockInteractor().getMockEvents().filter { it.sessionId == sessionId }
+            println("events from attempt $attempts $events")
+            if (events.isEmpty()) {
+                Thread.sleep(3000L)
+            }
+
+            attempts += 1
+        }
+
+        return events
+
     }
 
 }

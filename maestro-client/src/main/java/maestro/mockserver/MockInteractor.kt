@@ -85,23 +85,6 @@ class MockInteractor(
     }
 
     fun getMockEvents(): List<MockEvent> {
-        var attempts = 1
-        val maxRetries = 3
-        var events: List<MockEvent> = emptyList()
-
-        while (events.isEmpty() || attempts <= maxRetries) {
-            events = getMockEventsFromBackend()
-            if (events.isEmpty()) {
-                Thread.sleep(3000L)
-            }
-
-            attempts += 1
-        }
-
-        return events
-    }
-
-    private fun getMockEventsFromBackend(): List<MockEvent> {
         val authToken = getCachedAuthToken()
 
         val request = try {
