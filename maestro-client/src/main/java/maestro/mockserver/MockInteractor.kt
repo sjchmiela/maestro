@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.readText
+import kotlin.math.max
 
 data class Auth(
     val teamId: UUID,
@@ -84,6 +85,23 @@ class MockInteractor(
     }
 
     fun getMockEvents(): List<MockEvent> {
+        var attempts = 1
+        val maxRetries = 3
+        var events: List<MockEvent> = emptyList()
+
+        while (events.isEmpty() || attempts <= maxRetries) {
+            events = getMockEventsFromBackend()
+            if (events.isEmpty()) {
+                Thread.sleep(3000L)
+            }
+
+            attempts += 1
+        }
+
+        return events
+    }
+
+    private fun getMockEventsFromBackend(): List<MockEvent> {
         val authToken = getCachedAuthToken()
 
         val request = try {
