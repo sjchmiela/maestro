@@ -110,7 +110,13 @@ class MockInteractor(
     }
 
     companion object {
-        private const val API_URL = "https://api.mobile.dev"
+        private val API_URL by lazy {
+            if (System.getProperty("MAESTRO_CLOUD_API_URL").isNullOrEmpty()) {
+                "https://api.mobile.dev"
+            } else {
+                System.getProperty("MAESTRO_CLOUD_API_URL")
+            }
+        }
 
         private val cachedAuthTokenFile by lazy {
             Paths.get(
