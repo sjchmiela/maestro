@@ -16,7 +16,6 @@ object AssertOutgoingRequestService {
     private val REGEX_OPTIONS = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)
 
     fun assert(events: List<MockEvent>, rules: OutgoingRequestRules): List<MockEvent> {
-        println("events $events, rules $rules")
         val eventsFilteredByUrl = rules.path?.let { path ->
             events.filter { e -> e.path == path || e.path.matches(path.toRegexSafe(REGEX_OPTIONS)) }
         } ?: events
