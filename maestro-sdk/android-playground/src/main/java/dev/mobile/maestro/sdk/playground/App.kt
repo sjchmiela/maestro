@@ -8,6 +8,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        MaestroSdk.init("d2b3a603-9212-46eb-a23a-be13a997ed3c")
+        MaestroSdk.init("1c1291f2-578f-46bc-8ecc-f61477b1fefa")
     }
 }

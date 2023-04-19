@@ -85,7 +85,6 @@ class MockInteractor(
 
     fun getMockEvents(): List<MockEvent> {
         val authToken = getCachedAuthToken()
-        println("authToken: $authToken")
 
         val request = try {
             Request.Builder()
