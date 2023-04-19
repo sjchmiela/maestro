@@ -46,6 +46,7 @@ class MockInteractor(
         .build()
 
     fun getCachedAuthToken(): String? {
+        if (!System.getenv("MAESTRO_CLOUD_API_KEY").isNullOrEmpty()) return System.getenv("MAESTRO_CLOUD_API_KEY")
         if (!cachedAuthTokenFile.exists()) return null
         if (cachedAuthTokenFile.isDirectory()) return null
         return cachedAuthTokenFile.readText()
