@@ -47,6 +47,7 @@ object AssertOutgoingRequestService {
     That's why we have retries
      */
     fun getMockEvents(sessionId: UUID): List<MockEvent> {
+        println("sessionId $sessionId")
         var attempts = 1
         val maxRetries = 3
         var events: List<MockEvent> = emptyList()
