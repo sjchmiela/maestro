@@ -18,6 +18,7 @@ object AssertOutgoingRequestService {
     private val REGEX_OPTIONS = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)
 
     fun match(events: List<MockEvent>, rules: OutgoingRequestRules): List<MockEvent> {
+        println("rules $rules")
         val eventsFilteredByUrl = rules.path?.let { path ->
             events.filter { e -> e.path == path || e.path.matches(path.toRegexSafe(REGEX_OPTIONS)) }
         } ?: events
@@ -50,17 +51,13 @@ object AssertOutgoingRequestService {
         val maxRetries = 3
         var events: List<MockEvent> = emptyList()
 
-        while (events.isEmpty() && attempts <= maxRetries) {
+        while (events.isEmpty() || attempts <= maxRetries) {
             events = MockInteractor().getMockEvents().filter { it.sessionId == sessionId }
-            if (events.isEmpty()) {
-                Thread.sleep(3000L)
-            }
-
+            println("events from $attempts $events")
+            if (events.isEmpty()) Thread.sleep(3000L) else attempts = maxRetries + 1
             attempts += 1
         }
 
         return events
-
     }
-
 }
