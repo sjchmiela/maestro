@@ -106,6 +106,7 @@ class IOSDriver(
         launchArguments: List<String>,
         sessionId: UUID?,
     ) {
+        println("came here, setting sessionId $sessionId, iosDevice $iosDevice")
         iosDevice.launch(appId, launchArguments, sessionId)
             .onSuccess { this.appId = appId }
             .getOrThrow {
