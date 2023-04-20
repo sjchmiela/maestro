@@ -192,6 +192,7 @@ object LocalSimulatorUtils {
         launchArguments: List<String> = emptyList(),
         sessionId: String,
     ) {
+        println("Setting MAESTRO_SESSION_ID $sessionId")
         runCommand(
             listOf(
                 "xcrun",
