@@ -52,7 +52,7 @@ object AssertOutgoingRequestService {
         val maxRetries = 3
         var events: List<MockEvent> = emptyList()
 
-        while (events.isEmpty() || attempts <= maxRetries) {
+        while (events.isEmpty() && attempts <= maxRetries) {
             events = MockInteractor().getMockEvents().filter { it.sessionId == sessionId }
             println("events from $attempts $events")
             if (events.isEmpty()) Thread.sleep(3000L) else attempts = maxRetries + 1
