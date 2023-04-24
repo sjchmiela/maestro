@@ -518,6 +518,7 @@ class Maestro(private val driver: Driver) : AutoCloseable {
         assertHttpMethod: String? = null,
         assertRequestBodyContains: String? = null,
     ): Boolean {
+        println("session $sessionId")
         val events = AssertOutgoingRequestService.getMockEvents(sessionId)
         if (events.isEmpty()) return false
 

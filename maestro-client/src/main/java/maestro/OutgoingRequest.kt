@@ -52,6 +52,7 @@ object AssertOutgoingRequestService {
 
         while (events.isEmpty() && attempts <= maxRetries) {
             events = MockInteractor().getMockEvents().filter { it.sessionId == sessionId }
+            println("events from $attempts: $events")
             if (events.isEmpty()) Thread.sleep(3000L) else attempts = maxRetries + 1
             attempts += 1
         }

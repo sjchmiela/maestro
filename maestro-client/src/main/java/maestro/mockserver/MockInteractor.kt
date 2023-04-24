@@ -86,6 +86,8 @@ class MockInteractor(
 
     fun getMockEvents(): List<MockEvent> {
         val authToken = getCachedAuthToken()
+        println("authToken $authToken")
+        println("URL $API_URL")
 
         val request = try {
             Request.Builder()
@@ -129,8 +131,4 @@ class MockInteractor(
         private val JSON = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
     }
-}
-
-fun main() {
-    MockInteractor().getMockEvents()
 }
