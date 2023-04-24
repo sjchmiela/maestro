@@ -200,6 +200,7 @@ object LocalSimulatorUtils {
         launchArguments: List<String> = emptyList(),
         sessionId: String?,
     ) {
+        println("LocalSimulatorUtils.launch: $deviceId $sessionId")
         sessionId?.let {
             runCommand(
                 listOf(
