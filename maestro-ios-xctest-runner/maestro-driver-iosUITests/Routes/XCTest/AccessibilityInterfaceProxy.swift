@@ -10,14 +10,12 @@ import XCTest
 
 class AccessibilityInterfaceProxy {
 
-    private let maxDepth: Int
     private let accessibilityInterface: NSObject
 
-    init(maxDepth: Int) {
+    init() {
         let sharedDevice = XCUIDevice.shared
         accessibilityInterface = sharedDevice.perform(NSSelectorFromString("accessibilityInterface"))
             .takeUnretainedValue() as! NSObject
-        self.maxDepth = maxDepth
     }
 
     func configureMaxDepth() {
@@ -32,7 +30,7 @@ class AccessibilityInterfaceProxy {
         return [
             "maxArrayCount": 2147483647,
             "maxChildren": 2147483647,
-            "maxDepth": maxDepth /* This was int max by default */ ,
+            "maxDepth": 62 /* This was int max by default */ ,
             "traverseFromParentsToChildren": 1,
             "snapshotKeyHonorModalViews": 0
         ]

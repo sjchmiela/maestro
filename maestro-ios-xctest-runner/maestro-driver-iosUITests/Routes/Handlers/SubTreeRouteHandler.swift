@@ -20,10 +20,6 @@ struct SubTreeRouteHandler: HTTPHandler {
         let xcuiApplication = XCUIApplication(bundleIdentifier: appId)
         
         do {
-            if SubTreeRouteHandler.shouldSwizzleMaxDepth {
-                AccessibilityInterfaceProxy(maxDepth: 2147483647).configureMaxDepth()
-                SubTreeRouteHandler.shouldSwizzleMaxDepth = false
-            }
             let springboardBundleId = "com.apple.springboard"
             
             logger.info("Trying to capture hierarchy snapshot for \(appId)")
@@ -46,11 +42,41 @@ struct SubTreeRouteHandler: HTTPHandler {
             let message = error.localizedDescription
             logger.error("Snapshot failure, cannot return view hierarchy due to \(message)")
             let errorCode = getErrorCode(message: message)
-            let errorJson = """
-                 { "errorMessage" : "Snapshot failure while getting view hierarchy", "errorCode": "\(errorCode)" }
-                """
-            return HTTPResponse(statusCode: .badRequest, body:  Data(errorJson.utf8))
+            if errorCode == "illegal-argument-snapshot-failure" {
+                if !SubTreeRouteHandler.shouldSwizzleMaxDepth {
+                    AccessibilityInterfaceProxy().configureMaxDepth()
+                    SubTreeRouteHandler.shouldSwizzleMaxDepth = true
+                }
+                let xcuiElement = try getDeepestRootElement(app: xcuiApplication)
+                let viewHierarchyDictionary = try getViewHieararchyDictionary(appId: appId, xcuiElement: xcuiElement)
+                let hierarchyJsonData = try JSONSerialization.data(
+                    withJSONObject: viewHierarchyDictionary,
+                    options: .prettyPrinted
+                )
+                return HTTPResponse(statusCode: .ok, body: hierarchyJsonData)
+            } else {
+                let errorJson = """
+                     { "errorMessage" : "Snapshot failure while getting view hierarchy", "errorCode": "\(errorCode)" }
+                    """
+                return HTTPResponse(statusCode: .badRequest, body:  Data(errorJson.utf8))
+            }
         }
+    }
+    
+    func getDeepestRootElement(app: XCUIApplication) throws ->  XCUIElement {
+        var element: XCUIElement
+        let windowElement = app.children(matching: XCUIElement.ElementType.any).firstMatch
+        element = windowElement
+        while(try isDeepestWindowRoot(element: element, window: windowElement)) {
+            element = element.children(matching: XCUIElement.ElementType.other).firstMatch
+        }
+
+        return element
+    }
+    
+    func isDeepestWindowRoot(element: XCUIElement, window: XCUIElement) throws -> Bool {
+        return try element.snapshot().children.count == 1 && element.children(matching: XCUIElement.ElementType.other).firstMatch.exists
+            && element.children(matching: XCUIElement.ElementType.other).firstMatch.frame == window.frame
     }
     
     private func getViewHieararchyDictionary(appId: String, xcuiElement: XCUIElement) throws -> [XCUIElement.AttributeName: Any] {
