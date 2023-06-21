@@ -29,7 +29,12 @@ struct SubTreeRouteHandler: HTTPHandler {
             
             SystemPermissionHelper.handleSystemPermissionAlertIfNeeded(springboardApplication: springboardApplication)
             
-            let viewHierarchyDictionary = try getViewHieararchyDictionary(appId: appId, xcuiElement: xcuiApplication)
+            let viewHierarchyDictionary = try getViewHieararchyDictionary(
+                appId: appId,
+                xcuiElement: xcuiApplication,
+                includeKeyboard: false,
+                xcuiApplication: xcuiApplication
+            )
             
             let end = NSDate().timeIntervalSince1970 * 1000
             logger.info("Successfully got view hierarchy for \(appId) in \(end - start)")
@@ -48,7 +53,12 @@ struct SubTreeRouteHandler: HTTPHandler {
                     SubTreeRouteHandler.shouldSwizzleMaxDepth = true
                 }
                 let xcuiElement = try getDeepestRootElement(app: xcuiApplication)
-                let viewHierarchyDictionary = try getViewHieararchyDictionary(appId: appId, xcuiElement: xcuiElement)
+                let viewHierarchyDictionary = try getViewHieararchyDictionary(
+                    appId: appId,
+                    xcuiElement: xcuiElement,
+                    includeKeyboard: true,
+                    xcuiApplication: xcuiApplication
+                )
                 let hierarchyJsonData = try JSONSerialization.data(
                     withJSONObject: viewHierarchyDictionary,
                     options: .prettyPrinted
@@ -79,7 +89,12 @@ struct SubTreeRouteHandler: HTTPHandler {
             && element.children(matching: XCUIElement.ElementType.other).firstMatch.frame == window.frame
     }
     
-    private func getViewHieararchyDictionary(appId: String, xcuiElement: XCUIElement) throws -> [XCUIElement.AttributeName: Any] {
+    private func getViewHieararchyDictionary(
+        appId: String,
+        xcuiElement: XCUIElement,
+        includeKeyboard: Bool,
+        xcuiApplication: XCUIApplication
+    ) throws -> [XCUIElement.AttributeName: Any] {
         let springboardBundleId = "com.apple.springboard"
         
         let springboardApplication = XCUIApplication(bundleIdentifier: springboardBundleId)
@@ -95,6 +110,14 @@ struct SubTreeRouteHandler: HTTPHandler {
         let springChildren = springboardHierarchyDictionary[XCUIElement.AttributeName(rawValue: "children")] as? Array<[XCUIElement.AttributeName: Any]>
         let unifiedChildren = (children ?? [[XCUIElement.AttributeName: Any]]()) + (springChildren ?? [[XCUIElement.AttributeName: Any]]())
         viewHierarchyDictionary.updateValue(unifiedChildren as Any, forKey: XCUIElement.AttributeName.children)
+        
+        if includeKeyboard && xcuiApplication.keyboards.firstMatch.exists {
+            let keyboardHierarchyDictionary = try xcuiApplication.keyboards.firstMatch.snapshot().dictionaryRepresentation
+            let keyboardChildren = keyboardHierarchyDictionary[XCUIElement.AttributeName(rawValue: "children")] as? Array<[XCUIElement.AttributeName: Any]>
+            let unifiedChildren = (children ?? [[XCUIElement.AttributeName: Any]]()) + (springChildren ?? [[XCUIElement.AttributeName: Any]]())
+                + (keyboardChildren ?? [[XCUIElement.AttributeName: Any]]())
+            viewHierarchyDictionary.updateValue(unifiedChildren as Any, forKey: XCUIElement.AttributeName.children)
+        }
         
         return viewHierarchyDictionary
     }
