@@ -30,7 +30,7 @@ class AccessibilityInterfaceProxy {
         return [
             "maxArrayCount": 2147483647,
             "maxChildren": 2147483647,
-            "maxDepth": 62 /* This was int max by default */ ,
+            "maxDepth": 60 /* This was int max by default */ ,
             "traverseFromParentsToChildren": 1,
             "snapshotKeyHonorModalViews": 0
         ]
