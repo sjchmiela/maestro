@@ -1,6 +1,9 @@
+import Foundation
 import XCTest
 
-final class SystemPermissionHelper {
+struct SystemPermissionHelper {
+    private init() {}
+
     private static let notificationsPermissionLabel = "Would Like to Send You Notifications"
     
     static func handleSystemPermissionAlertIfNeeded(springboardApplication: XCUIApplication) {

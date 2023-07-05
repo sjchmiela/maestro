@@ -1,13 +1,9 @@
 import Foundation
-import os
 import XCTest
 
 @MainActor
 struct DeviceInfoHandler: JSONHandler {
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier!,
-        category: String(describing: Self.self)
-    )
+    private let logger = loggerFor(Self.self)
 
     func handleJSONRequest(_ requestBody: Void) async throws -> DeviceInfoResponse {
         let springboardBundleId = "com.apple.springboard"

@@ -1,19 +1,15 @@
-import FlyingFox
+import Foundation
 import XCTest
-import os
 
 @MainActor
 struct ViewHierarchyHandler: JSONHandler {
     typealias RequestBody = ViewHierarchyRequest
     typealias ResponseBody = AXElement
 
+    private let logger = loggerFor(Self.self)
     private static let springboardBundleId = "com.apple.springboard"
     private let springboardApplication = XCUIApplication(bundleIdentifier: Self.springboardBundleId)
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier!,
-        category: String(describing: Self.self)
-    )
 
     func handleJSONRequest(_ requestBody: ViewHierarchyRequest) async throws -> AXElement {
         let runningAppIds = requestBody.appIds

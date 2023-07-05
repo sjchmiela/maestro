@@ -1,15 +1,10 @@
 import Foundation
 import XCTest
 import CryptoKit
-import FlyingFox
-import os
 
 @MainActor
 struct IsScreenStaticHandler: JSONHandler {
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier!,
-        category: String(describing: Self.self)
-    )
+    private let logger = loggerFor(Self.self)
 
     func handleJSONRequest(_ requestBody: Void) async throws -> [String: Bool] {
         let screenshot1 = XCUIScreen.main.screenshot()

@@ -1,16 +1,11 @@
 import Foundation
-import XCTest
-import os
 
 @MainActor
 struct InputTextRouteHandler: JSONHandler {
     typealias RequestBody = InputTextRequest
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier!,
-        category: String(describing: Self.self)
-    )
-    
+    private let logger = loggerFor(Self.self)
+
     private enum Constants {
         static let typingFrequency = 30
         static let slowInputCharactersCount = 1

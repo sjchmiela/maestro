@@ -1,15 +1,11 @@
-import FlyingFox
+import Foundation
 import XCTest
-import os
 
 @MainActor
 struct SwipeRouteHandler: JSONHandler {
     typealias RequestBody = SwipeRequest
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier!,
-        category: String(describing: Self.self)
-    )
+    private let logger = loggerFor(Self.self)
 
     func handleJSONRequest(_ requestBody: SwipeRequest) async throws {
         try await swipePrivateAPI(
