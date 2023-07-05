@@ -5,7 +5,9 @@ public struct XCTestHTTPServer {
     public init() {}
     
     public func start() async throws {
-        let port = ProcessInfo.processInfo.environment["PORT"]?.toUInt16()
+        let port = ProcessInfo.processInfo
+            .environment["PORT"]
+            .flatMap { UInt16($0) }
         let server = HTTPServer(address: .loopback(port: port ?? 22087))
 
         XCUIApplicationProcessSwizzler.setup

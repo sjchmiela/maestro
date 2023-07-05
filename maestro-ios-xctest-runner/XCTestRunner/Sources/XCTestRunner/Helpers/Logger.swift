@@ -2,6 +2,13 @@
 import Foundation
 import os
 
+func loggerFor(_ type: some Any) -> Logger {
+    Logger(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: String(describing: type.self)
+    )
+}
+
 extension Logger {
     func measure<T>(message: String, _ block: () throws -> T) rethrows -> T {
         let start = Date()
