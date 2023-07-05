@@ -3,26 +3,21 @@ import XCTest
 import os
 
 @MainActor
-struct TouchRouteHandler: HTTPHandler {
+struct TouchRouteHandler: JSONHandler {
+    typealias RequestBody = TouchRequest
+
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: Self.self)
     )
-    
-    func handleRequest(_ request: FlyingFox.HTTPRequest) async throws -> FlyingFox.HTTPResponse {
-        let decoder = JSONDecoder()
-        
-        guard let requestBody = try? decoder.decode(TouchRequest.self, from: request.body) else {
-            let errorData = handleError(message: "incorrect request body provided")
-            return HTTPResponse(statusCode: HTTPStatusCode.badRequest, body: errorData)
-        }
-        
+
+    func handleJSONRequest(_ requestBody: TouchRequest) async throws {
         if requestBody.duration != nil {
             logger.info("Long pressing \(requestBody.x), \(requestBody.y) for \(requestBody.duration!)s")
         } else {
             logger.info("Tapping \(requestBody.x), \(requestBody.y)")
         }
-        
+
         let eventRecord = EventRecord(orientation: .portrait)
         _ = eventRecord.addPointerTouchEvent(
             at: CGPoint(x: CGFloat(requestBody.x), y: CGFloat(requestBody.y)),
@@ -30,23 +25,12 @@ struct TouchRouteHandler: HTTPHandler {
         )
 
         do {
-            let start = Date()
-            try await RunnerDaemonProxy().synthesize(eventRecord: eventRecord)
-            let duration = Date().timeIntervalSince(start)
-            logger.info("Tapping took \(duration)")
-            return HTTPResponse(statusCode: .ok)
+            try await logger.measureAsync(message: "Tapping element") {
+                try await RunnerDaemonProxy().synthesize(eventRecord: eventRecord)
+            }
         } catch {
             logger.error("Error tapping: \(error)")
-            return HTTPResponse(statusCode: .internalServerError)
+            throw AppError(message: "Error tapping: \(error)")
         }
     }
-    
-    private func handleError(message: String) -> Data {
-        logger.error("Failed to tap - \(message)")
-        let jsonString = """
-         { "errorMessage" : \(message) }
-        """
-        return Data(jsonString.utf8)
-    }
-    
 }

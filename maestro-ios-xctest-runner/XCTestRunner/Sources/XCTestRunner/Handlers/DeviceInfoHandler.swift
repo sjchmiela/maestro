@@ -1,17 +1,15 @@
 import Foundation
-import FlyingFox
 import os
 import XCTest
-import Network
 
 @MainActor
-struct DeviceInfoHandler: HTTPHandler {
+struct DeviceInfoHandler: JSONHandler {
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: Self.self)
     )
 
-    func handleRequest(_ request: HTTPRequest) async throws -> HTTPResponse {
+    func handleJSONRequest(_ requestBody: Void) async throws -> DeviceInfoResponse {
         let springboardBundleId = "com.apple.springboard"
         let springboardApp = XCUIApplication(bundleIdentifier: springboardBundleId)
         let screenSize = springboardApp.frame.size
@@ -23,15 +21,6 @@ struct DeviceInfoHandler: HTTPHandler {
             heightPixels: Int(screenSize.height * UIScreen.main.scale)
         )
 
-        let responseBody = try! JSONEncoder().encode(deviceInfo)
-        return HTTPResponse(statusCode: .ok, body: responseBody)
-    }
-
-    private func handleError(message: String) -> Data {
-        logger.error("Failed - \(message)")
-        let jsonString = """
-         { "errorMessage" : \(message) }
-        """
-        return Data(jsonString.utf8)
+        return deviceInfo
     }
 }

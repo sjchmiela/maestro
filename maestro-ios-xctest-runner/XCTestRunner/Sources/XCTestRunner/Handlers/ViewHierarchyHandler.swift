@@ -3,7 +3,9 @@ import XCTest
 import os
 
 @MainActor
-struct ViewHierarchyHandler: HTTPHandler {
+struct ViewHierarchyHandler: JSONHandler {
+    typealias RequestBody = ViewHierarchyRequest
+    typealias ResponseBody = AXElement
 
     private static let springboardBundleId = "com.apple.springboard"
     private let springboardApplication = XCUIApplication(bundleIdentifier: Self.springboardBundleId)
@@ -13,33 +15,20 @@ struct ViewHierarchyHandler: HTTPHandler {
         category: String(describing: Self.self)
     )
 
-    func handleRequest(_ request: FlyingFox.HTTPRequest) async throws -> HTTPResponse {
-        guard let requestBody = try? JSONDecoder().decode(ViewHierarchyRequest.self, from: request.body) else {
-            return AppError(type: .precondition, message: "incorrect request body provided").httpResponse
-        }
-
+    func handleJSONRequest(_ requestBody: ViewHierarchyRequest) async throws -> AXElement {
         let runningAppIds = requestBody.appIds
         let app = getForegroundApp(runningAppIds)
 
-        do {
-            guard let app = app else {
-                let springboardHierarchy = try elementHierarchy(xcuiElement: springboardApplication)
-                let body = try JSONEncoder().encode(springboardHierarchy)
-                return HTTPResponse(statusCode: .ok, body: body)
-            }
-
-            let viewHierarchy = try logger.measure(message: "View hierarchy snapshot for \(app)") {
-                try getAppViewHierarchy(app: app)
-            }
-
-            let body = try JSONEncoder().encode(viewHierarchy)
-            return HTTPResponse(statusCode: .ok, body: body)
-
-        } catch let error as AppError {
-            return error.httpResponse
-        } catch let error {
-            return AppError(message: "Snapshot failure while getting view hierarchy. Error: \(error.localizedDescription)").httpResponse
+        guard let app = app else {
+            let springboardHierarchy = try elementHierarchy(xcuiElement: springboardApplication)
+            return springboardHierarchy
         }
+
+        let viewHierarchy = try logger.measure(message: "View hierarchy snapshot for \(app)") {
+            try getAppViewHierarchy(app: app)
+        }
+
+        return viewHierarchy
     }
 
     func getForegroundApp(_ runningAppIds: [String]) -> XCUIApplication? {

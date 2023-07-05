@@ -3,44 +3,25 @@ import XCTest
 import os
 
 @MainActor
-struct SwipeRouteHandlerV2: HTTPHandler {
+struct SwipeRouteHandlerV2: JSONHandler {
+    typealias RequestBody = SwipeRequest
+
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier!,
         category: String(describing: Self.self)
     )
-    
-    func handleRequest(_ request: FlyingFox.HTTPRequest) async throws -> FlyingFox.HTTPResponse {
-        let decoder = JSONDecoder()
 
-        guard let requestBody = try? decoder.decode(SwipeRequest.self, from: request.body) else {
-            let errorData = handleError(message: "incorrect request body provided")
-            return HTTPResponse(statusCode: HTTPStatusCode.badRequest, body: errorData)
-        }
-
-        try await swipePrivateAPI(requestBody)
-
-        return HTTPResponse(statusCode: .ok)
-    }
-
-    func swipePrivateAPI(_ request: SwipeRequest) async throws {
-        let description = "Swipe from \(request.start) to \(request.end) with \(request.duration) duration"
+    func handleJSONRequest(_ requestBody: SwipeRequest) async throws {
+        let description = "Swipe from \(requestBody.start) to \(requestBody.end) with \(requestBody.duration) duration"
         logger.info("\(description)")
 
-        let eventTarget = EventTarget(bundleId: request.appId)
+        let eventTarget = EventTarget(bundleId: requestBody.appId)
         try await eventTarget.dispatchEvent(description: description) {
             EventRecord(orientation: .portrait)
                 .addSwipeEvent(
-                    start: request.start,
-                    end: request.end,
-                    duration: request.duration)
+                    start: requestBody.start,
+                    end: requestBody.end,
+                    duration: requestBody.duration)
         }
-    }
-
-    private func handleError(message: String) -> Data {
-        logger.error("Failed to swipe - \(message)")
-        let jsonString = """
-         { "errorMessage" : \(message) }
-        """
-        return Data(jsonString.utf8)
     }
 }

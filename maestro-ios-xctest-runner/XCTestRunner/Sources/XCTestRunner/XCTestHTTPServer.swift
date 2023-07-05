@@ -1,26 +1,5 @@
-import FlyingFox
 import Foundation
-
-enum Route: String, CaseIterable {
-    case subTree
-    case runningApp
-    case swipe
-    case swipeV2
-    case inputText
-    case touch
-    case screenshot
-    case isScreenStatic
-    case pressKey
-    case pressButton
-    case eraseText
-    case deviceInfo
-    case setPermissions
-    case viewHierarchy
-    
-    func toHTTPRoute() -> HTTPRoute {
-        return HTTPRoute(rawValue)
-    }
-}
+import FlyingFox
 
 public struct XCTestHTTPServer {
     public init() {}
@@ -30,12 +9,28 @@ public struct XCTestHTTPServer {
         let server = HTTPServer(address: .loopback(port: port ?? 22087))
 
         XCUIApplicationProcessSwizzler.setup
-        
-        for route in Route.allCases {
-            let handler = await RouteHandlerFactory.createRouteHandler(route: route)
-            await server.appendRoute(route.toHTTPRoute(), to: handler)
+
+        let routes: [(route: HTTPRoute, handler: HTTPHandler)] = await [
+            ("subTree", SubTreeRouteHandler()),
+            ("runningApp", RunningAppRouteHandler()),
+            ("swipe", SwipeRouteHandler()),
+            ("swipeV2", SwipeRouteHandlerV2()),
+            ("inputText", InputTextRouteHandler()),
+            ("touch", TouchRouteHandler()),
+            ("screenshot", ScreenshotHandler()),
+            ("isScreenStatic", IsScreenStaticHandler()),
+            ("pressKey", PressKeyHandler()),
+            ("pressButton", PressButtonHandler()),
+            ("eraseText", EraseTextHandler()),
+            ("deviceInfo", DeviceInfoHandler()),
+            ("setPermissions", SetPermissionsHandler()),
+            ("viewHierarchy", ViewHierarchyHandler()),
+        ]
+
+        for route in routes {
+            await server.appendRoute(route.route, to: route.handler)
         }
-        
+
         try await server.start()
     }
 }
