@@ -19,7 +19,7 @@ struct SubTreeRouteHandler: HTTPHandler {
             let xcuiApplication = XCUIApplication(bundleIdentifier: appId)
             let springboardApplication = XCUIApplication(bundleIdentifier: springboardBundleId)
             
-            SystemPermissionHelper.handleSystemPermissionAlertIfNeeded(springboardApplication: springboardApplication)
+            SystemPermissionHelper.handleSystemPermissionAlertIfNeeded()
             
             logger.info("[Start] Now trying hierarchy for: \(appId)")
             var viewHierarchyDictionary = try xcuiApplication.snapshot().dictionaryRepresentation

@@ -7,16 +7,13 @@ struct ViewHierarchyHandler: JSONHandler {
     typealias ResponseBody = AXElement
 
     private let logger = loggerFor(Self.self)
-    private static let springboardBundleId = "com.apple.springboard"
-    private let springboardApplication = XCUIApplication(bundleIdentifier: Self.springboardBundleId)
-
 
     func handleJSONRequest(_ requestBody: ViewHierarchyRequest) async throws -> AXElement {
         let runningAppIds = requestBody.appIds
         let app = getForegroundApp(runningAppIds)
 
         guard let app = app else {
-            let springboardHierarchy = try elementHierarchy(xcuiElement: springboardApplication)
+            let springboardHierarchy = try elementHierarchy(xcuiElement: XCUIApplication.springboard)
             return springboardHierarchy
         }
 
@@ -34,14 +31,14 @@ struct ViewHierarchyHandler: JSONHandler {
     }
 
     func getAppViewHierarchy(app: XCUIApplication) throws -> AXElement {
-        SystemPermissionHelper.handleSystemPermissionAlertIfNeeded(springboardApplication: springboardApplication)
+        SystemPermissionHelper.handleSystemPermissionAlertIfNeeded()
 
         // Fetch the view hierarchy of the springboard application
         // to make it possible to interact with the home screen.
         // Ignore any errors on fetching the springboard hierarchy.
         let springboardHierarchy: AXElement?
         do {
-            springboardHierarchy = try elementHierarchy(xcuiElement: springboardApplication)
+            springboardHierarchy = try elementHierarchy(xcuiElement: XCUIApplication.springboard)
         } catch {
             logger.error("Springboard hierarchy failed to fetch: \(error)")
             springboardHierarchy = nil

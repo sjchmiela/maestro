@@ -6,7 +6,7 @@ struct SystemPermissionHelper {
 
     private static let notificationsPermissionLabel = "Would Like to Send You Notifications"
     
-    static func handleSystemPermissionAlertIfNeeded(springboardApplication: XCUIApplication) {
+    static func handleSystemPermissionAlertIfNeeded() {
         let predicate = NSPredicate(format: "label CONTAINS[c] %@", notificationsPermissionLabel)
 
         guard let data = UserDefaults.standard.object(forKey: "permissions") as? Data,
@@ -15,7 +15,7 @@ struct SystemPermissionHelper {
             return
         }
 
-        let alert = springboardApplication.alerts.matching(predicate).element
+        let alert = XCUIApplication.springboard.alerts.matching(predicate).element
         if alert.exists {
             switch notificationsPermission.value {
             case .allow:
