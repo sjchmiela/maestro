@@ -2,12 +2,12 @@
 import Foundation
 import FlyingFox
 
-enum AppErrorType: String, Codable {
+enum AppErrorType: String {
     case `internal`
     case precondition
 }
 
-struct AppError: Error, Codable {
+struct AppError: Error {
     let type: AppErrorType
     let message: String
 
@@ -19,7 +19,7 @@ struct AppError: Error, Codable {
     }
 
     var httpResponse: HTTPResponse {
-        let body = try? JSONEncoder().encode(self)
+        let body = try? JSONEncoder().encode(["errorMessage": message])
         return HTTPResponse(statusCode: statusCode, body: body ?? Data())
     }
 
@@ -28,8 +28,10 @@ struct AppError: Error, Codable {
         self.message = message
     }
 
-    private enum CodingKeys : String, CodingKey {
-        case type = "code"
-        case message = "errorMessage"
+    init(_ error: Error) {
+        self.type = .internal
+        self.message = error.localizedDescription
     }
+
+    var localizedDescription: String { message }
 }

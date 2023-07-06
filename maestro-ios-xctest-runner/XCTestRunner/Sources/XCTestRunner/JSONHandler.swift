@@ -11,15 +11,14 @@ protocol JSONHandler: HTTPHandler {
 }
 
 extension JSONHandler where RequestBody == Void {
-    func requestBody(from request: HTTPRequest) -> Void { return }
+    func requestBody(from request: HTTPRequest) { }
 }
 
 extension JSONHandler where RequestBody: Decodable {
     func requestBody(from request: HTTPRequest) throws -> RequestBody {
         guard let requestBody = try? JSONDecoder().decode(RequestBody.self, from: request.body) else {
             let type = type(of: RequestBody.self)
-            let error = AppError(type: .precondition, message: "incorrect request body provided for \(type)")
-            throw error
+            throw AppError(type: .precondition, message: "Incorrect request body provided for \(type)")
         }
         return requestBody
     }
@@ -45,8 +44,7 @@ extension JSONHandler {
         } catch let error as AppError {
             return error.httpResponse
         } catch {
-            return AppError(type: .internal, message: error.localizedDescription)
-                .httpResponse
+            return AppError(error).httpResponse
         }
     }
 }

@@ -57,8 +57,7 @@ struct ViewHierarchyHandler: JSONHandler {
             return try elementHierarchy(xcuiElement: element)
         } catch let error {
             guard isIllegalArgumentError(error) else {
-                logger.error("Snapshot failure, cannot return view hierarchy due to \(error.localizedDescription)")
-                throw AppError(message: error.localizedDescription)
+                throw AppError(error)
             }
 
             logger.error("Snapshot failure, getting recovery element for fallback")
