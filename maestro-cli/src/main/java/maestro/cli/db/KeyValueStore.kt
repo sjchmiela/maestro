@@ -45,9 +45,16 @@ class KeyValueStore(
         return dbFile
             .readLines()
             .associate { line ->
-                val (key, value) = line.split("=", limit = 2)
-                key to value
+                val split = line.split("=", limit = 2)
+                if (split.size == 2) {
+                    val (key, value) = split
+                    key to value
+                } else {
+                    "" to ""
+                }
             }
+            .toMutableMap()
+            .filter { it.key.isNotEmpty() }
             .toMutableMap()
     }
 
