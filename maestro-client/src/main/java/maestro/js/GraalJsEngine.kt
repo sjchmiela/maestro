@@ -34,7 +34,9 @@ class GraalJsEngine(
     private val maestroBinding = HashMap<String, Any?>()
     private val envBinding = HashMap<String, String>()
 
-    private var onLogMessage: (String) -> Unit = {}
+    private var onLogMessage: (String) -> Unit = {
+        println("onLogMessage $it")
+    }
 
     override fun close() {
         openContexts.forEach { it.close() }
@@ -72,6 +74,7 @@ class GraalJsEngine(
             override fun flush() {
                 super.flush()
                 val log = toByteArray().decodeToString().removeSuffix("\n")
+                println("console.log $log")
                 onLogMessage(log)
                 reset()
             }
