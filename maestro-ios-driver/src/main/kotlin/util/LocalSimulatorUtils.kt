@@ -18,7 +18,7 @@ import kotlin.io.path.name
 
 object LocalSimulatorUtils {
 
-    data class SimctlError(override val message: String): Throwable(message)
+    data class SimctlError(override val message: String) : Throwable(message)
 
     private val homedir = System.getProperty("user.home")
 
@@ -51,33 +51,20 @@ object LocalSimulatorUtils {
         return jacksonObjectMapper().readValue(json)
     }
 
-    fun awaitLaunch(deviceId: String, timeout: Long= 30000) {
+    fun awaitLaunch(deviceId: String, timeout: Long = 30000) {
         MaestroTimer.withTimeout(timeout) {
-            if (list()
-                    .devices
-                    .values
-                    .flatten()
-                    .find { it.udid == deviceId }
-                    ?.state == "Booted"
-            ) true else null
+            if (list().devices.values.flatten().find { it.udid == deviceId }?.state == "Booted") true else null
         } ?: throw SimctlError("Device $deviceId did not boot in time")
     }
 
     fun awaitShutdown(deviceId: String) {
         MaestroTimer.withTimeout(30000) {
-            if (list()
-                    .devices
-                    .values
-                    .flatten()
-                    .find { it.udid == deviceId }
-                    ?.state != "Booted"
-            ) true else null
+            if (list().devices.values.flatten().find { it.udid == deviceId }?.state != "Booted") true else null
         } ?: throw SimctlError("Device $deviceId did not boot in time")
     }
 
     private fun xcodePath(): String {
-        val process = ProcessBuilder(listOf("xcode-select", "-p"))
-            .start()
+        val process = ProcessBuilder(listOf("xcode-select", "-p")).start()
 
         return process.inputStream.bufferedReader().readLine()
     }
@@ -85,13 +72,11 @@ object LocalSimulatorUtils {
     fun bootSimulator(deviceId: String) {
         runCommand(
             listOf(
-                "xcrun",
-                "simctl",
-                "boot",
-                deviceId
+                "xcrun", "simctl", "boot", deviceId
             )
         )
     }
+
     fun launchSimulator(deviceId: String) {
         val simulatorPath = "${xcodePath()}/Applications/Simulator.app"
         var exceptionToThrow: Exception? = null
@@ -101,12 +86,7 @@ object LocalSimulatorUtils {
             try {
                 runCommand(
                     listOf(
-                        "open",
-                        "-a",
-                        simulatorPath,
-                        "--args",
-                        "-CurrentDeviceUDID",
-                        deviceId
+                        "open", "-a", simulatorPath, "--args", "-CurrentDeviceUDID", deviceId
                     )
                 )
                 return
@@ -124,23 +104,15 @@ object LocalSimulatorUtils {
     ) {
         runCommand(
             listOf(
-                "xcrun",
-                "simctl",
-                "shutdown",
-                deviceId
-            ),
-            waitForCompletion = true
+                "xcrun", "simctl", "shutdown", deviceId
+            ), waitForCompletion = true
         )
         awaitShutdown(deviceId)
 
         runCommand(
             listOf(
-                "xcrun",
-                "simctl",
-                "boot",
-                deviceId
-            ),
-            waitForCompletion = true
+                "xcrun", "simctl", "boot", deviceId
+            ), waitForCompletion = true
         )
         awaitLaunch(deviceId)
     }
@@ -157,8 +129,7 @@ object LocalSimulatorUtils {
                 deviceId,
                 "add-root-cert",
                 certificate.absolutePath,
-            ),
-            waitForCompletion = true
+            ), waitForCompletion = true
         )
 
         reboot(deviceId)
@@ -168,15 +139,9 @@ object LocalSimulatorUtils {
         // Ignore error return: terminate will fail if the app is not running
         ProcessBuilder(
             listOf(
-                "xcrun",
-                "simctl",
-                "terminate",
-                deviceId,
-                bundleId
+                "xcrun", "simctl", "terminate", deviceId, bundleId
             )
-        )
-            .start()
-            .waitFor()
+        ).start().waitFor()
     }
 
     fun clearAppState(deviceId: String, bundleId: String) {
@@ -193,12 +158,7 @@ object LocalSimulatorUtils {
 
         // forces app container folder to be re-created
         val paths = listOf(
-            "Documents",
-            "Library",
-            "Library/Caches",
-            "Library/Preferences",
-            "SystemData",
-            "tmp"
+            "Documents", "Library", "Library/Caches", "Library/Preferences", "SystemData", "tmp"
         )
 
         val command = listOf("mkdir", appDataDirectory) + paths.map { "$appDataDirectory/$it" }
@@ -208,18 +168,12 @@ object LocalSimulatorUtils {
     private fun getApplicationDataDirectory(deviceId: String, bundleId: String): String {
         val process = ProcessBuilder(
             listOf(
-                "xcrun",
-                "simctl",
-                "get_app_container",
-                deviceId,
-                bundleId,
-                "data"
+                "xcrun", "simctl", "get_app_container", deviceId, bundleId, "data"
             )
         ).start()
 
         return String(process.inputStream.readBytes()).trimEnd()
     }
-
 
     fun launch(
         deviceId: String,
@@ -281,11 +235,7 @@ object LocalSimulatorUtils {
     fun uninstall(deviceId: String, bundleId: String) {
         runCommand(
             listOf(
-                "xcrun",
-                "simctl",
-                "uninstall",
-                deviceId,
-                bundleId
+                "xcrun", "simctl", "uninstall", deviceId, bundleId
             )
         )
     }
@@ -293,11 +243,7 @@ object LocalSimulatorUtils {
     fun addMedia(deviceId: String, path: String) {
         runCommand(
             listOf(
-                "xcrun",
-                "simctl",
-                "addmedia",
-                deviceId,
-                path
+                "xcrun", "simctl", "addmedia", deviceId, path
             )
         )
     }
@@ -317,8 +263,7 @@ object LocalSimulatorUtils {
 
         runCommand(
             listOf(
-                "rm", "-rf",
-                "$homedir/Library/Developer/CoreSimulator/Devices/$deviceId/data/Library/Keychains"
+                "rm", "-rf", "$homedir/Library/Developer/CoreSimulator/Devices/$deviceId/data/Library/Keychains"
             )
         )
 
@@ -349,10 +294,8 @@ object LocalSimulatorUtils {
             }
         }
 
-        val permissionsArgument = permissionsMap
-            .filter { allPermissions.contains(it.key) }
-            .map { "${it.key}=${translatePermissionValue(it.value)}" }
-            .joinToString(",")
+        val permissionsArgument = permissionsMap.filter { allPermissions.contains(it.key) }
+            .map { "${it.key}=${translatePermissionValue(it.value)}" }.joinToString(",")
 
         if (permissionsArgument.isNotEmpty()) {
             try {
@@ -367,7 +310,7 @@ object LocalSimulatorUtils {
                         permissionsArgument
                     )
                 )
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 runCommand(
                     listOf(
                         "applesimutils",
@@ -403,17 +346,16 @@ object LocalSimulatorUtils {
         }
 
 
-        permissionsMap
-            .forEach {
-                if (simctlPermissions.contains(it.key)) {
-                    when (it.key) {
-                        // TODO: more simctl supported permissions can be migrated here
-                        "location" -> {
-                            setLocationPermission(deviceId, bundleId, it.value)
-                        }
+        permissionsMap.forEach {
+            if (simctlPermissions.contains(it.key)) {
+                when (it.key) {
+                    // TODO: more simctl supported permissions can be migrated here
+                    "location" -> {
+                        setLocationPermission(deviceId, bundleId, it.value)
                     }
                 }
             }
+        }
     }
 
     private fun setLocationPermission(deviceId: String, bundleId: String, value: String) {
@@ -421,13 +363,7 @@ object LocalSimulatorUtils {
             "always" -> {
                 runCommand(
                     listOf(
-                        "xcrun",
-                        "simctl",
-                        "privacy",
-                        deviceId,
-                        "grant",
-                        "location-always",
-                        bundleId
+                        "xcrun", "simctl", "privacy", deviceId, "grant", "location-always", bundleId
                     )
                 )
             }
@@ -435,13 +371,7 @@ object LocalSimulatorUtils {
             "inuse" -> {
                 runCommand(
                     listOf(
-                        "xcrun",
-                        "simctl",
-                        "privacy",
-                        deviceId,
-                        "grant",
-                        "location",
-                        bundleId
+                        "xcrun", "simctl", "privacy", deviceId, "grant", "location", bundleId
                     )
                 )
             }
@@ -449,13 +379,7 @@ object LocalSimulatorUtils {
             "never" -> {
                 runCommand(
                     listOf(
-                        "xcrun",
-                        "simctl",
-                        "privacy",
-                        deviceId,
-                        "revoke",
-                        "location-always",
-                        bundleId
+                        "xcrun", "simctl", "privacy", deviceId, "revoke", "location-always", bundleId
                     )
                 )
             }
@@ -463,13 +387,7 @@ object LocalSimulatorUtils {
             "unset" -> {
                 runCommand(
                     listOf(
-                        "xcrun",
-                        "simctl",
-                        "privacy",
-                        deviceId,
-                        "reset",
-                        "location-always",
-                        bundleId
+                        "xcrun", "simctl", "privacy", deviceId, "reset", "location-always", bundleId
                     )
                 )
             }
@@ -504,13 +422,9 @@ object LocalSimulatorUtils {
         val temp = createTempDirectory()
         val extractDir = temp.toFile()
 
-        ArchiverFactory
-            .createArchiver(ArchiveFormat.ZIP)
-            .extract(stream, extractDir)
+        ArchiverFactory.createArchiver(ArchiveFormat.ZIP).extract(stream, extractDir)
 
-        val app = extractDir.walk()
-            .filter { it.name.endsWith(".app") }
-            .first()
+        val app = extractDir.walk().filter { it.name.endsWith(".app") }.first()
 
         runCommand(
             listOf(
@@ -525,40 +439,36 @@ object LocalSimulatorUtils {
 
     data class ScreenRecording(
         val process: Process,
-        val file: File
+        val file: File,
     )
 
     fun startScreenRecording(deviceId: String): ScreenRecording {
         val tempDir = createTempDirectory()
-        val inputStream = LocalSimulatorUtils::class.java.getResourceAsStream("/screenrecord.sh")
-        if (inputStream != null) {
-            val recording = File(tempDir.toFile(), "screenrecording.mov")
+        val recording = File(tempDir.toFile(), "screenrecording.mov")
 
-            val processBuilder = ProcessBuilder(
-                listOf(
-                    "bash",
-                    "-c",
-                    inputStream.bufferedReader().readText()
-                )
-            )
-            val environment = processBuilder.environment()
-            environment["DEVICE_ID"] = deviceId
-            environment["RECORDING_PATH"] = recording.path
+        val screenRecording = runCommand(
+            listOf(
+                "xcrun",
+                "simctl",
+                "io",
+                deviceId,
+                "recordVideo",
+                "--force",
+                "--codec",
+                "h264",
+                recording.absolutePath,
+            ),
+            waitForCompletion = false
+        )
 
-            val recordingProcess = processBuilder
-                .redirectInput(PIPE)
-                .start()
-
-            return ScreenRecording(
-                recordingProcess,
-                recording
-            )
-        } else {
-            throw IllegalStateException("screenrecord.sh file not found")
-        }
+        return ScreenRecording(
+            screenRecording, recording
+        )
     }
 
     fun stopScreenRecording(screenRecording: ScreenRecording): File {
+        screenRecording.process.destroy()
+        Thread.sleep(1000)
         screenRecording.process.outputStream.close()
         screenRecording.process.waitFor()
         return screenRecording.file
