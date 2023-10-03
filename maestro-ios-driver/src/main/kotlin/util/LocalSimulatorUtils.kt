@@ -530,37 +530,29 @@ object LocalSimulatorUtils {
 
     fun startScreenRecording(deviceId: String): ScreenRecording {
         val tempDir = createTempDirectory()
-        val inputStream = LocalSimulatorUtils::class.java.getResourceAsStream("/screenrecord.sh")
-        if (inputStream != null) {
-            val recording = File(tempDir.toFile(), "screenrecording.mov")
+        val recording = File(tempDir.toFile(), "screenrecording_$deviceId.mov")
 
-            val processBuilder = ProcessBuilder(
-                listOf(
-                    "bash",
-                    "-c",
-                    inputStream.bufferedReader().readText()
-                )
+        val recordingProcess = runCommand(
+            listOf(
+                "xcrun",
+                "simctl",
+                "io",
+                deviceId,
+                "recordVideo",
+                "--force",
+                "--codec",
+                "h264",
+                recording.absolutePath
             )
-            val environment = processBuilder.environment()
-            environment["DEVICE_ID"] = deviceId
-            environment["RECORDING_PATH"] = recording.path
+        )
 
-            val recordingProcess = processBuilder
-                .redirectInput(PIPE)
-                .start()
-
-            return ScreenRecording(
-                recordingProcess,
-                recording
-            )
-        } else {
-            throw IllegalStateException("screenrecord.sh file not found")
-        }
+        return ScreenRecording(recordingProcess, recording)
     }
 
     fun stopScreenRecording(screenRecording: ScreenRecording): File {
-        screenRecording.process.outputStream.close()
+        screenRecording.process.destroy()
         screenRecording.process.waitFor()
+        screenRecording.process.outputStream.close()
         return screenRecording.file
     }
 }
