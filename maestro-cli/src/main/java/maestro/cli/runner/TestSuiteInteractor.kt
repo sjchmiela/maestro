@@ -11,6 +11,7 @@ import maestro.cli.util.PrintUtils
 import maestro.cli.view.ErrorViewUtils
 import maestro.cli.view.TestSuiteStatusView
 import maestro.cli.view.TestSuiteStatusView.TestSuiteViewModel
+import maestro.orchestra.MaestroCommand
 import maestro.orchestra.Orchestra
 import maestro.orchestra.util.Env.withEnv
 import maestro.orchestra.workspace.WorkspaceExecutionPlanner
@@ -27,6 +28,7 @@ class TestSuiteInteractor(
     private val maestro: Maestro,
     private val device: Device? = null,
     private val reporter: TestSuiteReporter,
+    private val withScreenshots: Boolean
 ) {
 
     private val logger = LoggerFactory.getLogger(TestSuiteInteractor::class.java)
@@ -51,7 +53,7 @@ class TestSuiteInteractor(
         // first run sequence of flows if present
         val flowSequence = executionPlan.sequence
         for (flow in flowSequence?.flows ?: emptyList()) {
-            val result = runFlow(flow.toFile(), env, maestro, debugOutputPath)
+            val result = runFlow(flow.toFile(), env, maestro, debugOutputPath, withScreenshots)
             flowResults.add(result)
 
             if (result.status == FlowStatus.ERROR) {
@@ -66,7 +68,7 @@ class TestSuiteInteractor(
 
         // proceed to run all other Flows
         executionPlan.flowsToRun.forEach { flow ->
-            val result = runFlow(flow.toFile(), env, maestro, debugOutputPath)
+            val result = runFlow(flow.toFile(), env, maestro, debugOutputPath, withScreenshots)
 
             if (result.status == FlowStatus.ERROR) {
                 passed = false
@@ -118,7 +120,8 @@ class TestSuiteInteractor(
         flowFile: File,
         env: Map<String, String>,
         maestro: Maestro,
-        debugOutputPath: Path
+        debugOutputPath: Path,
+        withScreenshots: Boolean
     ): TestExecutionSummary.FlowResult {
         var flowName: String = flowFile.nameWithoutExtension
         var flowStatus: FlowStatus
@@ -129,7 +132,7 @@ class TestSuiteInteractor(
         val debugCommands = debug.commands
         val debugScreenshots = debug.screenshots
 
-        fun takeDebugScreenshot(status: CommandStatus): File? {
+        fun takeDebugScreenshot(command: MaestroCommand, status: CommandStatus): File? {
             val containsFailed = debugScreenshots.any { it.status == CommandStatus.FAILED }
 
             // Avoids duplicate failed images from parent commands
@@ -137,15 +140,18 @@ class TestSuiteInteractor(
                 return null
             }
 
+            val description = command.description().lowercase().replace(" ", "_").replace("/", "-").trim()
+
             val result = kotlin.runCatching {
-                val out = File.createTempFile("screenshot-${System.currentTimeMillis()}", ".png")
+                val out = File.createTempFile("screenshot-(${description})-${System.currentTimeMillis()}", ".png")
                     .also { it.deleteOnExit() } // save to another dir before exiting
                 maestro.takeScreenshot(out, false)
                 debugScreenshots.add(
                     ScreenshotDebugMetadata(
                         screenshot = out,
                         timestamp = System.currentTimeMillis(),
-                        status = status
+                        status = status,
+                        description = description
                     )
                 )
                 out
@@ -172,6 +178,11 @@ class TestSuiteInteractor(
                     },
                     onCommandComplete = { _, command ->
                         logger.info("${command.description()} COMPLETED")
+
+                        if (withScreenshots && !command.isAssertCommand()) {
+                            takeDebugScreenshot(command, CommandStatus.COMPLETED)
+                        }
+
                         debugCommands[command]?.let {
                             it.status = CommandStatus.COMPLETED
                             it.calculateDuration()
@@ -186,7 +197,7 @@ class TestSuiteInteractor(
                             it.error = e
                         }
 
-                        takeDebugScreenshot(CommandStatus.FAILED)
+                        takeDebugScreenshot(command, CommandStatus.FAILED)
                         Orchestra.ErrorResolution.FAIL
                     },
                     onCommandSkipped = { _, command ->

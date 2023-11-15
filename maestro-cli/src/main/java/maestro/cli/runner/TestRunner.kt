@@ -42,7 +42,8 @@ object TestRunner {
         flowFile: File,
         env: Map<String, String>,
         resultView: ResultView,
-        debugOutputPath: Path
+        debugOutputPath: Path,
+        withScreenshots: Boolean
     ): Int {
 
         // debug
@@ -56,7 +57,8 @@ object TestRunner {
                 device,
                 resultView,
                 commands,
-                debug
+                debug,
+                withScreenshots
             )
         }
 
@@ -112,7 +114,8 @@ object TestRunner {
                                 device,
                                 resultView,
                                 commands,
-                                FlowDebugMetadata()
+                                FlowDebugMetadata(),
+                                false
                             )
                         }.get()
                     }

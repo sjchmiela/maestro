@@ -101,6 +101,9 @@ class TestCommand : Callable<Int> {
     )
     private var excludeTags: List<String> = emptyList()
 
+    @Option(names = ["--with-screenshots"], description = ["Takes a screenshot for each command run (excludes assertions)"])
+    private var withScreenshots: Boolean = false
+
     @CommandLine.Spec
     lateinit var commandSpec: CommandLine.Model.CommandSpec
 
@@ -149,6 +152,7 @@ class TestCommand : Callable<Int> {
                     maestro = maestro,
                     device = device,
                     reporter = ReporterFactory.buildReporter(format, testSuiteName),
+                    withScreenshots = withScreenshots
                 ).runTestSuite(
                     executionPlan = executionPlan,
                     env = env,
@@ -174,7 +178,7 @@ class TestCommand : Callable<Int> {
                     TestRunner.runContinuous(maestro, device, flowFile, env)
                 } else {
                     val resultView = if (DisableAnsiMixin.ansiEnabled) AnsiResultView() else PlainTextResultView()
-                    val resultSingle = TestRunner.runSingle(maestro, device, flowFile, env, resultView, debugOutputPath)
+                    val resultSingle = TestRunner.runSingle(maestro, device, flowFile, env, resultView, debugOutputPath, withScreenshots)
                     if (resultSingle == 1) {
                         printExitDebugMessage()
                     }

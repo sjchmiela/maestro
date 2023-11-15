@@ -64,7 +64,7 @@ object TestDebugReporter {
                 CommandStatus.FAILED -> "❌"
                 else -> "﹖"
             }
-            val name = "screenshot-$status-${it.timestamp}-(${flowName}).png"
+            val name = "screenshot-$status-(${it.description})-(${flowName})-${it.timestamp}.png"
             val file = File(path.absolutePathString(), name)
 
             it.screenshot.copyTo(file)
@@ -160,7 +160,8 @@ data class CommandDebugMetadata(
 data class ScreenshotDebugMetadata(
     val screenshot: File,
     val timestamp: Long,
-    val status: CommandStatus
+    val status: CommandStatus,
+    val description: String
 )
 
 data class FlowDebugMetadata(

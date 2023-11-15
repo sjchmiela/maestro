@@ -148,4 +148,6 @@ data class MaestroCommand(
     fun description(): String {
         return asCommand()?.description() ?: "No op"
     }
+
+    fun isAssertCommand(): Boolean = assertCommand != null || assertConditionCommand != null
 }

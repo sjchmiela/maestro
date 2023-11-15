@@ -49,7 +49,8 @@ object MaestroCommandRunner {
         device: Device?,
         view: ResultView,
         commands: List<MaestroCommand>,
-        debug: FlowDebugMetadata
+        debug: FlowDebugMetadata,
+        withScreenshots: Boolean
     ): Result {
         val config = YamlCommandReader.getConfig(commands)
         val initFlow = config?.initFlow
@@ -63,7 +64,7 @@ object MaestroCommandRunner {
         val debugCommands = debug.commands
         val debugScreenshots = debug.screenshots
 
-        fun takeDebugScreenshot(status: CommandStatus): File? {
+        fun takeDebugScreenshot(command: MaestroCommand, status: CommandStatus): File? {
             val containsFailed = debugScreenshots.any { it.status == CommandStatus.FAILED }
 
             // Avoids duplicate failed images from parent commands
@@ -71,15 +72,18 @@ object MaestroCommandRunner {
                 return null
             }
 
+            val description = command.description().lowercase().replace(" ", "_").replace("/", "-").trim()
+
             val result = kotlin.runCatching {
-                val out = File.createTempFile("screenshot-${System.currentTimeMillis()}", ".png")
+                val out = File.createTempFile("screenshot-($description)-${System.currentTimeMillis()}", ".png")
                     .also { it.deleteOnExit() } // save to another dir before exiting
                 maestro.takeScreenshot(out, false)
                 debugScreenshots.add(
                     ScreenshotDebugMetadata(
                         screenshot = out,
                         timestamp = System.currentTimeMillis(),
-                        status = status
+                        status = status,
+                        description = description
                     )
                 )
                 out
@@ -133,6 +137,11 @@ object MaestroCommandRunner {
             onCommandComplete = { _, command ->
                 logger.info("${command.description()} COMPLETED")
                 commandStatuses[command] = CommandStatus.COMPLETED
+
+                if (withScreenshots && !command.isAssertCommand()) {
+                    takeDebugScreenshot(command, CommandStatus.COMPLETED)
+                }
+
                 debugCommands[command]?.let {
                     it.status = CommandStatus.COMPLETED
                     it.calculateDuration()
@@ -146,7 +155,7 @@ object MaestroCommandRunner {
                     it.error = e
                 }
 
-                takeDebugScreenshot(CommandStatus.FAILED)
+                takeDebugScreenshot(command, CommandStatus.FAILED)
 
                 if (e !is MaestroException) {
                     throw e
