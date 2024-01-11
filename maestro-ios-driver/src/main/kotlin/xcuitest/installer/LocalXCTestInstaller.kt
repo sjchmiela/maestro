@@ -74,7 +74,7 @@ class LocalXCTestInstaller(
 
         stop()
 
-        repeat(3) { i ->
+        repeat(5) { i ->
             logger.info("[Start] Install XCUITest runner on $deviceId")
             startXCTestRunner()
             logger.info("[Done] Install XCUITest runner on $deviceId")
@@ -92,12 +92,20 @@ class LocalXCTestInstaller(
     }
 
     override fun isChannelAlive(): Boolean {
-        return XCRunnerCLIUtils.isAppAlive(UI_TEST_RUNNER_APP_BUNDLE_ID, deviceId) &&
-            xcTestDriverStatusCheck().use { it.isSuccessful }
+        return XCRunnerCLIUtils.isAppAlive(UI_TEST_RUNNER_APP_BUNDLE_ID, deviceId) && checkConnection()
     }
 
+    private fun checkConnection(): Boolean {
+        return try {
+            xcTestDriverStatusCheck().use { it.isSuccessful }
+        } catch (ioException: IOException) {
+            false
+        }
+    }
+
+
     private fun ensureOpen(): Boolean {
-        return MaestroTimer.retryUntilTrue(10_000, 200) {
+        return MaestroTimer.retryUntilTrue(20_000, 200) {
             try {
                 XCRunnerCLIUtils.isAppAlive(UI_TEST_RUNNER_APP_BUNDLE_ID, deviceId) &&
                     xcTestDriverStatusCheck().use { it.isSuccessful }
